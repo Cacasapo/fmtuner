@@ -3,8 +3,8 @@ Contributors: command_tab
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=533819
 Tags: music,last.fm,sidebar,mp3
 Requires at least: 2.5
-Tested up to: 2.7.1
-Stable tag: 1.0.6
+Tested up to: 2.8.5
+Stable tag: 1.0.7
 
 fmTuner displays recent, top, or loved Last.fm tracks in a customizable format.
 
@@ -82,7 +82,7 @@ Occasionally, you may find that the number of displayed tracks does not match th
 fmTuner needs certain PHP functions to talk to Last.fm and handle responses, and while it takes precautions to avoid blatant errors, it's possible your server doesn't meet the necessary requirements.
 
 1. Ensure your server is running PHP 5 or later.  If using a hosted environment, your provider may be able to do this for you.
-1. Set `allow_url_fopen`="On" in your php.ini file, or confirm that the cURL extension is installed.  fmTuner will try one method of fetching track listings, and fall back when required.
+1. fmTuner needs to communicate with Last.fm.  Set `allow_url_fopen`="On" in your php.ini file, or confirm that the cURL extension is installed.  fmTuner will try one method of fetching track listings, and fall back when required.
 
 == Removal ==
 
@@ -95,5 +95,31 @@ Be sure to [get in touch](http://www.command-tab.com/) if there's something that
 
 == Screenshots ==
 
-1. fmTuner Settings interface in WordPress 2.7.1.
+1. fmTuner Settings screen.
 1. One of many possible display options. You are free to configure fmTuner how you prefer!
+
+== Changelog ==
+
+= 1.0.7 =
+* Tracks with foreign character sets now display more accurately.
+
+= 1.0.6 =
+* You can now display more than 10 Recent Tracks, and you should get fewer tracks without artwork.
+
+= 1.0.5 =
+* Track information is now properly escaped to handle $ signs, quotes, and other non-alphanumeric characters.
+
+= 1.0.4 =
+* Made minor tweaks for fmTuner Settings page under WordPress 2.7.
+
+= 1.0.3 =
+* Added a `[::number::]` fmTuner tag has been added, which prints a sequential number for each track (starting at 1). This is particularly useful for CSS and JavaScript hooks.
+
+= 1.0.2 =
+* Added a cURL-based alternative to `file_get_contents` to hopefully resolve "URL file-access is disabled" issues. If `allow_url_fopen` is disabled in your php.ini, cURL will be used to fetch the Last.fm feed instead.
+
+= 1.0.1 =
+* Added better failure checking and informational messages, removed development code, and updated instructions.
+
+= 1.0 =
+* Initial release.
