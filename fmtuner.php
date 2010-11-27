@@ -2,7 +2,7 @@
 	
 	/*
 	Plugin Name: fmTuner
-	Version: 1.0.5
+	Version: 1.0.6
 	Plugin URI: http://www.command-tab.com
 	Description: Displays recent, top, or loved <a href="http://www.last.fm/home" target="_blank">Last.fm</a> tracks in a <a href="options-general.php?page=fmtuner/fmtuner.php">customizable format</a>.
 	Author: Collin Allen
@@ -43,12 +43,15 @@
 			$iCacheTime = get_option('fmtuner_update_frequency');
 			$sCachePath = get_option('fmtuner_cachepath');
 			$iTrackLimit = get_option('fmtuner_track_limit');
+			$iTrackLimitWithBuffer = $iTrackLimit + 15; // Grab extra in case some albums don't have artwork
 			$sBaseUrl = 'http://ws.audioscrobbler.com/2.0/?method=';
 			$sMethod = get_option('fmtuner_track_type');
 			$sUsername = get_option('fmtuner_username');
 			$sApiKey = 'ff0eaca3b7e2660755d6c652af7b0489';
-			$sApiUrl = "{$sBaseUrl}{$sMethod}&user={$sUsername}&api_key={$sApiKey}";
 			$sDisplayFormat = get_option('fmtuner_display_format');
+			$sApiUrl = "{$sBaseUrl}{$sMethod}&user={$sUsername}&api_key={$sApiKey}&limit={$iTrackLimitWithBuffer}";
+			
+			// Check if we're using images or not
 			$bUsingImages = false;
 			if (strpos($sDisplayFormat, '[::image::]') === false)
 			{
@@ -219,7 +222,7 @@
 	{
 		add_option('fmtuner_cachepath', dirname(__FILE__).'/fmtuner_cache.xml'); // Default cache location
 		add_option('fmtuner_username', ''); // Default to ''
-		add_option('fmtuner_track_type', 'user.getlovedtracks'); // Default to 'Loved tracks'
+		add_option('fmtuner_track_type', 'user.getrecenttracks'); // Default to 'Recent Tracks'
 		add_option('fmtuner_update_frequency', 3600); // Default to 'Every hour'
 		add_option('fmtuner_track_limit', 2); // Default to max of 2 tracks
 		add_option('fmtuner_display_format', '<li>[::artist::] - [::title::]<img src="[::image::]" alt="[::title::] by [::artist::]" /></li>'); // Default format
@@ -260,7 +263,7 @@
 	
 	
 	
-	// Hook into WordPress to call |setup_fmtuner_options| when the admin menu is loaded
+	// Hook into WordPress to call setup_fmtuner_options() when the admin menu is loaded
 	add_action('admin_menu', 'setup_fmtuner_options');
 	
 	
@@ -277,8 +280,10 @@
 			$sBaseUrl = 'http://ws.audioscrobbler.com/2.0/?method=';
 			$sMethod = get_option('fmtuner_track_type');
 			$sUsername = get_option('fmtuner_username');
+			$iTrackLimit = get_option('fmtuner_track_limit');
+			$iTrackLimitWithBuffer = $iTrackLimit + 15; // Grab extra in case some albums don't have artwork
 			$sApiKey = 'ff0eaca3b7e2660755d6c652af7b0489';
-			$sApiUrl = "{$sBaseUrl}{$sMethod}&user={$sUsername}&api_key={$sApiKey}";
+			$sApiUrl = "{$sBaseUrl}{$sMethod}&user={$sUsername}&api_key={$sApiKey}&limit={$iTrackLimitWithBuffer}";
 			if ($sUsername != '')
 			{
 				$sTracksXml = fmtuner_fetch($sApiUrl);
@@ -356,7 +361,8 @@
 								</th>
 								<td>
 									<p>
-										<label for="fmtuner_display_format">The fmTuner tags below can be used among standard <abbr title="HyperText Markup Language">HTML</abbr> to customize the album display format.  Tags can be used more than once, or completely left out, depending on your preferences.
+										<label for="fmtuner_display_format">The fmTuner tags below can be used among standard <abbr title="HyperText Markup Language">HTML</abbr> to customize the album display format.  Tags can be used more than once, or completely left out, depending on your preferences.  The block of code you design below will be used for each track, so put other non-track-related code around your fmTuner call:
+											<pre>&lt;?php if(function_exists('fmtuner')) { fmtuner(); } ?&gt;</pre>
 											<ul style="margin: 0px; padding: 0px; list-style: none;">
 												<li><code>[::album::]</code> Album name (Only available for <strong>Recent tracks</strong>.)</li>
 												<li><code>[::artist::]</code> Artist name</li>
@@ -385,7 +391,5 @@
 			
 		<?php
 	}
-	
-
 	
 ?>
