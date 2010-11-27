@@ -2,7 +2,7 @@
     
     /*
     Plugin Name: fmTuner
-    Version: 1.0.7
+    Version: 1.0.8
     Plugin URI: http://www.command-tab.com
     Description: Displays recent, top, or loved <a href="http://www.last.fm/home" target="_blank">Last.fm</a> tracks in a <a href="options-general.php?page=fmtuner/fmtuner.php">customizable format</a>.
     Author: Collin Allen
@@ -54,13 +54,9 @@
             // Check if we're using images or not
             $bUsingImages = false;
             if (strpos($sDisplayFormat, '[::image::]') === false)
-            {
                 $bUsingImages = false;
-            }
             else
-            {
                 $bUsingImages = true;
-            }
             
             // Run only if a username is set
             if ($sUsername)
@@ -118,20 +114,14 @@
                     {
                         // If we want to use images, but the current $oTrack has no big image, skip it
                         if ($bUsingImages && $oTrack->image[2] == '')
-                        {
                             continue;
-                        }
                         
                         // 'Recent tracks' <artist> node has no <name> child node, while other methods do.
                         // Sort it out and get the artist name into $sArtist
                         if ($sMethod == 'user.getrecenttracks')
-                        {
                             $sArtist = $oTrack->artist;
-                        }
                         else
-                        {
                             $sArtist = $oTrack->artist->name;
-                        }
                         
                         // Store each track in $aTracks, and check it every iteration so as not to output duplicates
                         $sKey = $sArtist . ' - ' . $oTrack->name;
@@ -157,14 +147,12 @@
                                 $oTrack->image[2],
                                 $iTotal,
                                 $oTrack->name,
-                                $oTrack->url
+                                (strpos($oTrack->url, 'http') === 0) ? $oTrack->url : 'http://' . $oTrack->url
                             );
                             
                             // Clean up data, prevent XSS, etc.
                             foreach ($aData as $iKey => $sValue)
-                            {
                                 $aData[$iKey] = trim(strip_tags(htmlspecialchars($sValue)));
-                            }
                             
                             // Merge $aTags and $aData
                             echo preg_replace($aTags, $aData, $sDisplayFormat);
@@ -235,9 +223,7 @@
     {
         $sCachePath = get_option('fmtuner_cachepath');
         if (file_exists($sCachePath))
-        {
             unlink($sCachePath);
-        }
         
         delete_option('fmtuner_cachepath');
         delete_option('fmtuner_username');
