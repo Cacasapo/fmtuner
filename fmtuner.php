@@ -2,7 +2,7 @@
 	
 	/*
 	Plugin Name: fmTuner
-	Version: 1.0.4
+	Version: 1.0.5
 	Plugin URI: http://www.command-tab.com
 	Description: Displays recent, top, or loved <a href="http://www.last.fm/home" target="_blank">Last.fm</a> tracks in a <a href="options-general.php?page=fmtuner/fmtuner.php">customizable format</a>.
 	Author: Collin Allen
@@ -156,6 +156,12 @@
 								$oTrack->name,
 								$oTrack->url
 							);
+							
+							// Clean up data, prevent XSS, etc.
+							foreach ($aData as $iKey => $sValue)
+							{
+								$aData[$iKey] = trim(strip_tags(htmlentities($sValue)));
+							}
 							
 							// Merge $aTags and $aData
 							echo preg_replace($aTags, $aData, $sDisplayFormat);

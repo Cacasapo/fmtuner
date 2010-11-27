@@ -3,8 +3,8 @@ Contributors: command_tab
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=533819
 Tags: music,last.fm,sidebar,mp3
 Requires at least: 2.5
-Tested up to: 2.7
-Stable tag: 1.0.4
+Tested up to: 2.7.1
+Stable tag: 1.0.5
 
 fmTuner displays recent, top, or loved Last.fm tracks in a customizable format.
 
