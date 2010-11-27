@@ -2,8 +2,8 @@
     
     /*
     Plugin Name: fmTuner
-    Version: 1.0.9
-    Plugin URI: http://www.command-tab.com/2008/09/06/fmtuner-a-lastfm-plugin-for-wordpress/
+    Version: 1.1
+    Plugin URI: http://www.command-tab.com/2008/09/06/fmtuner-a-lastfm-plugin-for-wordpress
     Description: Displays recent, top, or loved <a href="http://www.last.fm/home" target="_blank">Last.fm</a> tracks in a customizable format.
     Author: Collin Allen
     Author URI: http://www.command-tab.com
@@ -11,7 +11,7 @@
     
     
     /*
-    Copyright (c) 2010 Collin Allen, http://www.command-tab.com/
+    Copyright (c) 2010 Collin Allen, http://www.command-tab.com
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -34,7 +34,7 @@
     */
     
     
-    // Display last.fm tracks, no duplicates, none without "large" artwork
+    // Display last.fm tracks, no duplicates
     function fmtuner()
     {
         if (function_exists('simplexml_load_string') && function_exists('file_put_contents'))
@@ -49,6 +49,7 @@
             $sUsername = get_option('fmtuner_username');
             $sApiKey = 'ff0eaca3b7e2660755d6c652af7b0489';
             $sDisplayFormat = get_option('fmtuner_display_format');
+            $sPlaceholderImage = get_option('fmtuner_placeholder_image');
             $sApiUrl = "{$sBaseUrl}{$sMethod}&user={$sUsername}&api_key={$sApiKey}&limit={$iTrackLimitWithBuffer}";
             
             // Check if we're using images or not
@@ -112,9 +113,14 @@
                     // Loop over each track, outputting it in the desired format
                     foreach($xTracks as $oTrack)
                     {
-                        // If we want to use images, but the current $oTrack has no big image, skip it
-                        if ($bUsingImages && $oTrack->image[2] == '')
+                        // Handle tracks without artwork and placeholder image swapping
+                        $sImage = $oTrack->image[2];
+                        if ($sPlaceholderImage != '')
+                            $sPlaceholderImage = str_replace('[::template_directory::]', get_bloginfo('template_directory'), $sPlaceholderImage);
+                        if ($bUsingImages && $sImage == '' && $sPlaceholderImage == '')
                             continue;
+                        if ($bUsingImages && $sImage == '' && $sPlaceholderImage != '')
+                            $sImage = $sPlaceholderImage;
                         
                         // 'Recent tracks' <artist> node has no <name> child node, while other methods do.
                         // Sort it out and get the artist name into $sArtist
@@ -134,20 +140,20 @@
                             
                             // Dump out the blob of HTML with data embedded
                             $aTags = array(
-                                '/\[::album::\]/',
-                                '/\[::artist::\]/',
-                                '/\[::image::\]/',
-                                '/\[::number::\]/',
-                                '/\[::title::\]/',
-                                '/\[::url::\]/'
+                                '[::album::]',
+                                '[::artist::]',
+                                '[::image::]',
+                                '[::number::]',
+                                '[::title::]',
+                                '[::url::]'
                             );
                             $aData = array(
                                 $oTrack->album,
                                 $sArtist,
-                                $oTrack->image[2],
+                                $sImage,
                                 $iTotal,
                                 $oTrack->name,
-                                (strpos($oTrack->url, 'http') === 0) ? $oTrack->url : 'http://' . $oTrack->url
+                                (strpos($oTrack->url, 'http') === 0) ? $oTrack->url : 'http://' . $oTrack->url // Some tracks start with 'www', which creates a bad link
                             );
                             
                             // Clean up data, prevent XSS, etc.
@@ -155,7 +161,7 @@
                                 $aData[$iKey] = trim(strip_tags(htmlspecialchars($sValue)));
                             
                             // Merge $aTags and $aData
-                            echo preg_replace($aTags, $aData, $sDisplayFormat);
+                            echo str_replace($aTags, $aData, $sDisplayFormat);
                             
                             // Increment the counter so we can check the track limit next time around
                             $iTotal++;
@@ -165,7 +171,7 @@
             }
             else
             {
-                echo 'Please <a href="'.get_bloginfo('wpurl').'/wp-admin/options-general.php?page=fmtuner/fmtuner.php">set fmTuner options</a> in your WordPress administration panel.';
+                echo 'Please <a href="' . get_bloginfo('wpurl') . '/wp-admin/options-general.php?page=fmtuner/fmtuner.php">set fmTuner options</a> in your WordPress administration panel.';
             } // end if (username)
         }
         else
@@ -214,6 +220,7 @@
         add_option('fmtuner_update_frequency', 3600); // Default to 'Every hour'
         add_option('fmtuner_track_limit', 2); // Default to max of 2 tracks
         add_option('fmtuner_display_format', '<li>[::artist::] - [::title::]<img src="[::image::]" alt="[::title::] by [::artist::]" /></li>'); // Default format
+        add_option('fmtuner_placeholder_image', ''); // Default placeholder image
     }
     
     
@@ -231,6 +238,7 @@
         delete_option('fmtuner_update_frequency');
         delete_option('fmtuner_track_limit');
         delete_option('fmtuner_display_format');
+        delete_option('fmtuner_placeholder_image');
     }
     
     
@@ -298,6 +306,7 @@
 <?php
         }
 ?>
+                <div class="icon32" id="icon-options-general"><br /></div>
                 <h2>fmTuner Settings</h2>
                 <form action="options.php" method="post">
                     <?php wp_nonce_field('update-options'); // Protect against XSS ?>
@@ -309,7 +318,7 @@
                                 </th>
                                 <td>
                                     <input type="text" size="25" value="<?php echo get_option('fmtuner_username'); ?>" id="fmtuner_username" name="fmtuner_username" />
-                                    <br />Enter your <a href="http://www.last.fm/home" target="_blank">Last.fm</a> username
+                                    <span class="description">Enter your <a href="http://www.last.fm/home" target="_blank">Last.fm</a> username</span>
                                 </td>
                             </tr>
                             <tr valign="top">
@@ -338,7 +347,8 @@
                                     <label for="fmtuner_track_limit">Track Limit</label>
                                 </th>
                                 <td>
-                                    Show <input type="text" size="3" value="<?php echo get_option('fmtuner_track_limit'); ?>" id="fmtuner_track_limit" name="fmtuner_track_limit" /> tracks at most.
+                                    <input type="text" size="3" value="<?php echo get_option('fmtuner_track_limit'); ?>" id="fmtuner_track_limit" name="fmtuner_track_limit" />
+                                    <span class="description">How many tracks should be displayed at most?</span>
                                 </td>
                             </tr>
                             <tr valign="top">
@@ -346,7 +356,6 @@
                                     <label for="fmtuner_update_frequency">Update Frequency</label>
                                 </th>
                                 <td>
-                                    
                                     <select id="fmtuner_update_frequency" name="fmtuner_update_frequency">
                                         <?php $iUpdateFrequency = get_option('fmtuner_update_frequency'); ?>
                                         <option <?php if ($iUpdateFrequency == 900) { echo 'selected="selected" '; } ?> value="900">Every 15 minutes</option>
@@ -354,6 +363,7 @@
                                         <option <?php if ($iUpdateFrequency == 3600) { echo 'selected="selected" '; } ?> value="3600">Every hour</option>
                                         <option <?php if ($iUpdateFrequency == 86400) { echo 'selected="selected" '; } ?> value="86400">Every day</option>
                                     </select>
+                                    <span class="description">How often should fmTuner update from Last.fm?</span>
                                 </td>
                             </tr>
                             <tr valign="top">
@@ -361,29 +371,52 @@
                                     <label for="fmtuner_display_format">Display Format</label>
                                 </th>
                                 <td>
-                                    <p>
-                                        <label for="fmtuner_display_format">The fmTuner tags below can be used among standard <abbr title="HyperText Markup Language">HTML</abbr> to customize the album display format.  Tags can be used more than once, or completely left out, depending on your preferences.  The block of code you design below will be used for each track, so put other non-track-related code around your fmTuner call:
-                                            <pre>&lt;?php if(function_exists('fmtuner')) { fmtuner(); } ?&gt;</pre>
-                                            <ul style="margin: 0px; padding: 0px; list-style: none;">
-                                                <li><code>[::album::]</code> Album name (Only available for <strong>Recent tracks</strong>.)</li>
-                                                <li><code>[::artist::]</code> Artist name</li>
-                                                <li><code>[::image::]</code> Album artwork address (Usually ~120 pixels in size &mdash; may not be square.  If used, only tracks with artwork will be shown.)</li>
-                                                <li><code>[::number::]</code> Track number within the fmTuner set (e.g. for a numbered list)</li>
-                                                <li><code>[::title::]</code> Track title</li>
-                                                <li><code>[::url::]</code> Last.fm track address</li>
-                                            </ul>
-                                        </label>
-                                    </p>
-                                    <p>
-                                        <textarea class="code" style="width: 98%; font-size: 12px;" id="fmtuner_display_format" rows="8" cols="60" name="fmtuner_display_format"><?php echo get_option('fmtuner_display_format'); ?></textarea>
-                                    </p>
+                                    The fmTuner tags below can be used among standard <abbr title="HyperText Markup Language">HTML</abbr> to customize the album display format.  Tags can be used more than once, or completely left out, depending on your preferences.  The block of code you design below will be used for each track, so put other unrelated code (like <code>&lt;ul&gt;</code> HTML tags, for example) around your fmTuner call in your WordPress template.
+                                    <table>
+                                        <tr>
+                                            <td><code>[::album::]</code></td>
+                                            <td>Album name (only available for <strong>Recent tracks</strong>)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>[::artist::]</code></td>
+                                            <td>Artist name</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>[::image::]</code></td>
+                                            <td>Album artwork address (usually around 120&times;120 pixels in size, but may not be perfectly square)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>[::number::]</code></td>
+                                            <td>Track number within the fmTuner set (for a numbered list)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>[::title::]</code></td>
+                                            <td>Track title</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>[::url::]</code></td>
+                                            <td>Last.fm track address</td>
+                                        </tr>
+                                    </table>
+                                    <textarea class="code" style="width: 98%; font-size: 12px;" id="fmtuner_display_format" rows="8" cols="60" name="fmtuner_display_format"><?php echo get_option('fmtuner_display_format'); ?></textarea>
+                                    Once your display format code is designed above, don't forget to put <code>&lt;?php if(function_exists('fmtuner')) { fmtuner(); } ?&gt;</code> into one of your WordPress template files, such as <code>wp-content/themes/themename/sidebar.php</code>.
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <th scope="row">
+                                    <label for="fmtuner_placeholder_image">Placeholder Image Address</label>
+                                </th>
+                                <td>
+                                    <input type="text" size="80" value="<?php echo get_option('fmtuner_placeholder_image'); ?>" id="fmtuner_placeholder_image" name="fmtuner_placeholder_image" />
+                                    <br />
+                                    When no album artwork address is provided by Last.fm, this placeholder address will be substituted.<br />Leave this field blank to skip tracks lacking artwork.<br />You can also use <code>[::template_directory::]</code> in this field to customize the placeholder on a per-theme basis.<br />Examples: <code>http://www.example.com/blank.jpg</code> or <code>[::template_directory::]/images/placeholder.jpg</code>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                     <p class="submit">
                         <input type="hidden" name="action" value="update" />
-                        <input type="hidden" name="page_options" value="fmtuner_username,fmtuner_track_type,fmtuner_update_frequency,fmtuner_track_limit,fmtuner_display_format" />
+                        <input type="hidden" name="page_options" value="fmtuner_username,fmtuner_track_type,fmtuner_update_frequency,fmtuner_track_limit,fmtuner_display_format,fmtuner_placeholder_image" />
                         <input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" />
                     </p>
                 </form>
