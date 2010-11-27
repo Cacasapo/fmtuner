@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: music,last.fm,sidebar,mp3
 Requires at least: 2.5
 Tested up to: 2.6.2
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 
 fmTuner displays recent, top, or loved Last.fm tracks in a customizable format.
 
@@ -28,12 +28,12 @@ Requirements:
 
 == Installation ==
 
-Installation of fmTuner is rather straightforward, however it does require PHP 5 or greater.
+Installation of fmTuner is straightforward, however it does require PHP 5 or greater.
 
 1. Upload `fmtuner.php` to your `/wp-content/plugins/` directory, within a directory like `fmtuner`.
 1. Ensure `/wp-content/plugins/fmtuner/` is writable by your webserver (`chmod 755 fmtuner`).
-1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. Set up options in the "Settings" menu in WordPress.
+1. Activate the plugin through the 'Plugins' page in the WordPress admin.
+1. Set your fmTuner preferences in the "Settings" menu in WordPress.
 1. Place `<?php if(function_exists('fmtuner')) { fmtuner(); } ?>` in your desired template.
 
 == Frequently Asked Questions ==
@@ -44,7 +44,7 @@ fmTuner pulls your latest tracks from Last.fm according to the settings page in 
 
 = How many tracks can I display? =
 
-Tracks can be limited in the settings page for fmTuner, however Last.fm provides up to 10 Recent Tracks.  Loved and Top Tracks offer many, many more.  Between 1 and 10 is recommended.
+Tracks can be limited in the settings page for fmTuner, however Last.fm only provides up to 10 Recent Tracks.  Loved and Top Tracks offer many more.  Between 1 and 10 is recommended.
 
 == Removal ==
 

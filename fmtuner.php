@@ -2,7 +2,7 @@
 	
 	/*
 	Plugin Name: fmTuner
-	Version: 1.0.2
+	Version: 1.0.3
 	Plugin URI: http://www.command-tab.com
 	Description: Displays recent, top, or loved <a href="http://www.last.fm/home" target="_blank">Last.fm</a> tracks in a <a href="options-general.php?page=fmtuner/fmtuner.php">customizable format</a>.
 	Author: Collin Allen
@@ -145,6 +145,7 @@
 								'/\[::album::\]/',
 								'/\[::artist::\]/',
 								'/\[::image::\]/',
+								'/\[::number::\]/',
 								'/\[::title::\]/',
 								'/\[::url::\]/'
 							);
@@ -152,6 +153,7 @@
 								$oTrack->album,
 								$sArtist,
 								$oTrack->image[2],
+								$iTotal,
 								$oTrack->name,
 								$oTrack->url
 							);
@@ -356,6 +358,7 @@
 													<li><code>[::album::]</code> Album name (Only available for <strong>Recent tracks</strong>.)</li>
 													<li><code>[::artist::]</code> Artist name</li>
 													<li><code>[::image::]</code> Album artwork address (Usually ~120 pixels in size &mdash; may not be square.  If used, only tracks with artwork will be shown.)</li>
+													<li><code>[::number::]</code> Track number within the fmTuner set (e.g. for a numbered list)</li>
 													<li><code>[::title::]</code> Track title</li>
 													<li><code>[::url::]</code> Last.fm track address</li>
 												</ul>
