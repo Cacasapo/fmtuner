@@ -2,7 +2,7 @@
 	
 	/*
 	Plugin Name: fmTuner
-	Version: 1.0
+	Version: 1.0.1
 	Plugin URI: http://www.command-tab.com
 	Description: Displays recent, top, or loved <a href="http://www.last.fm/home" target="_blank">Last.fm</a> tracks in a <a href="options-general.php?page=fmtuner/fmtuner.php">customizable format</a>.
 	Author: Collin Allen
@@ -38,135 +38,142 @@
 	// Display last.fm tracks, no duplicates, none without "large" artwork
 	function fmtuner()
 	{
-		// Fetch options from WordPress DB and set up variables
-		$iCacheTime = get_option('fmtuner_update_frequency');
-		$sCachePath = get_option('fmtuner_cachepath');
-		$iTrackLimit = get_option('fmtuner_track_limit');
-		$sBaseUrl = 'http://ws.audioscrobbler.com/2.0/?method=';
-		$sMethod = get_option('fmtuner_track_type');
-		$sUsername = get_option('fmtuner_username');
-		$sApiKey = 'ff0eaca3b7e2660755d6c652af7b0489';
-		$sApiUrl = "{$sBaseUrl}{$sMethod}&user={$sUsername}&api_key={$sApiKey}";
-		$sDisplayFormat = get_option('fmtuner_display_format');
-		$bUsingImages = false;
-		if (strpos($sDisplayFormat, '[::image::]') === false)
+		if (function_exists('simplexml_load_string') && function_exists('file_put_contents'))
 		{
+			// Fetch options from WordPress DB and set up variables
+			$iCacheTime = get_option('fmtuner_update_frequency');
+			$sCachePath = get_option('fmtuner_cachepath');
+			$iTrackLimit = get_option('fmtuner_track_limit');
+			$sBaseUrl = 'http://ws.audioscrobbler.com/2.0/?method=';
+			$sMethod = get_option('fmtuner_track_type');
+			$sUsername = get_option('fmtuner_username');
+			$sApiKey = 'ff0eaca3b7e2660755d6c652af7b0489';
+			$sApiUrl = "{$sBaseUrl}{$sMethod}&user={$sUsername}&api_key={$sApiKey}";
+			$sDisplayFormat = get_option('fmtuner_display_format');
 			$bUsingImages = false;
-		}
-		else
-		{
-			$bUsingImages = true;
-		}
-		
-		// Run only if a username is set
-		if ($sUsername)
-		{
-			// If the cached XML exists on disk
-			if (file_exists($sCachePath))
+			if (strpos($sDisplayFormat, '[::image::]') === false)
 			{
-				// Compare file modification time against update frequency
-				if (time() - filemtime($sCachePath) > $iCacheTime)
-				{
-					// Cache miss
-					$sTracksXml = file_get_contents($sApiUrl);
-					file_put_contents($sCachePath, $sTracksXml);
-				}
-				else
-				{
-					// Cache hit
-					$sTracksXml = file_get_contents($sCachePath);
-				}
+				$bUsingImages = false;
 			}
 			else
 			{
-				// Fetch the XML for the first time
-				$sTracksXml = file_get_contents($sApiUrl);
-				file_put_contents($sCachePath, $sTracksXml);
+				$bUsingImages = true;
 			}
 			
-			// Parse the XML
-			$xTracksXml = simplexml_load_string($sTracksXml);
-			$aTracks = array();
-			$iTotal = 1;
-			
-			// If we have any parsed tracks
-			if ($xTracksXml)
+			// Run only if a username is set
+			if ($sUsername)
 			{
-				// Switch based on selected track type
-				switch($sMethod)
+				// If the cached XML exists on disk
+				if (file_exists($sCachePath))
 				{
-					case 'user.getlovedtracks':
-						$xTracks = $xTracksXml->lovedtracks->track;
-						break;
-					case 'user.getrecenttracks':
-						$xTracks = $xTracksXml->recenttracks->track;
-						break;
-					case 'user.gettoptracks':
-						$xTracks = $xTracksXml->toptracks->track;
-						break;
-					default:
-						$xTracks = $xTracksXml->lovedtracks->track;
-						break;
-				}
-				
-				// Loop over each track, outputting it in the desired format
-				foreach($xTracks as $oTrack)
-				{
-					// If we want to use images, but the current $oTrack has no big image, skip it
-					if ($bUsingImages && $oTrack->image[2] == '')
+					// Compare file modification time against update frequency
+					if (time() - filemtime($sCachePath) > $iCacheTime)
 					{
-						continue;
-					}
-					
-					// 'Recent tracks' <artist> node has no <name> child node, while other methods do.
-					// Sort it out and get the artist name into $sArtist
-					if ($sMethod == 'user.getrecenttracks')
-					{
-						$sArtist = $oTrack->artist;
+						// Cache miss
+						$sTracksXml = file_get_contents($sApiUrl);
+						file_put_contents($sCachePath, $sTracksXml);
 					}
 					else
 					{
-						$sArtist = $oTrack->artist->name;
+						// Cache hit
+						$sTracksXml = file_get_contents($sCachePath);
 					}
-					
-					// Store each track in $aTracks, and check it every iteration so as not to output duplicates
-					$sKey = $sArtist . ' - ' . $oTrack->name;
-					
-					// If the current track is not in $aTracks and we haven't hit the track limit
-					if (!in_array($sKey, $aTracks) != "" && $iTotal <= $iTrackLimit)
+				}
+				else
+				{
+					// Fetch the XML for the first time
+					$sTracksXml = file_get_contents($sApiUrl);
+					file_put_contents($sCachePath, $sTracksXml);
+				}
+				
+				// Parse the XML
+				$xTracksXml = simplexml_load_string($sTracksXml);
+				$aTracks = array();
+				$iTotal = 1;
+				
+				// If we have any parsed tracks
+				if ($xTracksXml)
+				{
+					// Switch based on selected track type
+					switch($sMethod)
 					{
-						// Shove the current track into $aTracks to be checked for next time around
-						$aTracks[] = $sKey;
-						
-						// Dump out the blob of HTML with data embedded
-						$aTags = array(
-							'/\[::album::\]/',
-							'/\[::artist::\]/',
-							'/\[::image::\]/',
-							'/\[::title::\]/',
-							'/\[::url::\]/'
-						);
-						$aData = array(
-							$oTrack->album,
-							$sArtist,
-							$oTrack->image[2],
-							$oTrack->name,
-							$oTrack->url
-						);
-						
-						// Merge $aTags and $aData
-						echo preg_replace($aTags, $aData, $sDisplayFormat);
-						
-						// Increment the counter so we can check the track limit next time around
-						$iTotal++;
+						case 'user.getlovedtracks':
+							$xTracks = $xTracksXml->lovedtracks->track;
+							break;
+						case 'user.getrecenttracks':
+							$xTracks = $xTracksXml->recenttracks->track;
+							break;
+						case 'user.gettoptracks':
+							$xTracks = $xTracksXml->toptracks->track;
+							break;
+						default:
+							$xTracks = $xTracksXml->lovedtracks->track;
+							break;
 					}
-				} // end foreach loop
-			} // end if (any parsed tracks)
+					
+					// Loop over each track, outputting it in the desired format
+					foreach($xTracks as $oTrack)
+					{
+						// If we want to use images, but the current $oTrack has no big image, skip it
+						if ($bUsingImages && $oTrack->image[2] == '')
+						{
+							continue;
+						}
+						
+						// 'Recent tracks' <artist> node has no <name> child node, while other methods do.
+						// Sort it out and get the artist name into $sArtist
+						if ($sMethod == 'user.getrecenttracks')
+						{
+							$sArtist = $oTrack->artist;
+						}
+						else
+						{
+							$sArtist = $oTrack->artist->name;
+						}
+						
+						// Store each track in $aTracks, and check it every iteration so as not to output duplicates
+						$sKey = $sArtist . ' - ' . $oTrack->name;
+						
+						// If the current track is not in $aTracks and we haven't hit the track limit
+						if (!in_array($sKey, $aTracks) != "" && $iTotal <= $iTrackLimit)
+						{
+							// Shove the current track into $aTracks to be checked for next time around
+							$aTracks[] = $sKey;
+							
+							// Dump out the blob of HTML with data embedded
+							$aTags = array(
+								'/\[::album::\]/',
+								'/\[::artist::\]/',
+								'/\[::image::\]/',
+								'/\[::title::\]/',
+								'/\[::url::\]/'
+							);
+							$aData = array(
+								$oTrack->album,
+								$sArtist,
+								$oTrack->image[2],
+								$oTrack->name,
+								$oTrack->url
+							);
+							
+							// Merge $aTags and $aData
+							echo preg_replace($aTags, $aData, $sDisplayFormat);
+							
+							// Increment the counter so we can check the track limit next time around
+							$iTotal++;
+						}
+					} // end foreach loop
+				} // end if (any parsed tracks)
+			}
+			else
+			{
+				echo 'Please <a href="'.get_bloginfo('wpurl').'/wp-admin/options-general.php?page=fmtuner/fmtuner.php">set fmTuner options</a> in your WordPress administration panel.';
+			} // end if (username)
 		}
 		else
 		{
-			echo 'Please <a href="'.get_bloginfo('wpurl').'/wp-admin/options-general.php?page=fmtuner/fmtuner.php">set fmTuner options</a> in your WordPress administration panel.';
-		} // end if (username)
+			echo 'fmTuner requires PHP version 5 or greater.  Please contact your web host for more information.';
+		} // end PHP5 check
 	} // end fmtuner()
 	
 	
@@ -224,21 +231,31 @@
 	
 	// Display the options page in wp-admin
 	function fmtuner_options()
-	{
-		// Fetch XML again, since key options (username, track type) may have changed
-		$sBaseUrl = 'http://ws.audioscrobbler.com/2.0/?method=';
-		$sMethod = get_option('fmtuner_track_type');
-		$sUsername = get_option('fmtuner_username');
-		$sApiKey = 'ff0eaca3b7e2660755d6c652af7b0489';
-		$sApiUrl = "{$sBaseUrl}{$sMethod}&user={$sUsername}&api_key={$sApiKey}";
-		if ($sUsername != '')
-		{
-			$sTracksXml = file_get_contents($sApiUrl);
-			file_put_contents(get_option('fmtuner_cachepath'), $sTracksXml);
-		}
-?>
+	{ ?>
 		<div id="wpbody">
 			<div class="wrap">
+<?php
+		if (function_exists('simplexml_load_string') && function_exists('file_put_contents'))
+		{
+			// Fetch XML again, since key options (username, track type) may have changed
+			$sBaseUrl = 'http://ws.audioscrobbler.com/2.0/?method=';
+			$sMethod = get_option('fmtuner_track_type');
+			$sUsername = get_option('fmtuner_username');
+			$sApiKey = 'ff0eaca3b7e2660755d6c652af7b0489';
+			$sApiUrl = "{$sBaseUrl}{$sMethod}&user={$sUsername}&api_key={$sApiKey}";
+			if ($sUsername != '')
+			{
+				$sTracksXml = file_get_contents($sApiUrl);
+				file_put_contents(get_option('fmtuner_cachepath'), $sTracksXml);
+			}
+		}
+		else
+		{
+?>
+			<div class="error" style="padding: 5px; font-weight: bold;">fmTuner requires PHP version 5 or greater. Please contact your web host for more information.</div>
+<?php
+		}
+?>
 				<h2>fmTuner Settings</h2>
 				<form action="options.php" method="post">
 					<?php wp_nonce_field('update-options'); // Protect against XSS ?>
@@ -281,7 +298,7 @@
 									<label for="fmtuner_track_limit">Track Limit</label>
 								</th>
 								<td>
-									Show <input type="text" autocomplete="off" size="3" value="<?php echo get_option('fmtuner_track_limit'); ?>" id="fmtuner_track_limit" name="fmtuner_track_limit" /> tracks at most.
+									Show <input type="text" size="3" value="<?php echo get_option('fmtuner_track_limit'); ?>" id="fmtuner_track_limit" name="fmtuner_track_limit" /> tracks at most.
 								</td>
 							</tr>
 							<tr valign="top">
@@ -324,7 +341,6 @@
 						</tbody>
 					</table>
 					<p class="submit">
-						<?php echo get_option('fmtuner_api_url'); ?>
 						<input type="hidden" name="action" value="update" />
 						<input type="hidden" name="page_options" value="fmtuner_username,fmtuner_track_type,fmtuner_update_frequency,fmtuner_track_limit,fmtuner_display_format" />
 						<input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" />
