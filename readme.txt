@@ -1,10 +1,10 @@
 === fmTuner ===
 Contributors: command_tab
-Donate link: http://www.command-tab.com/
-Tags: music, last.fm, sidebar, mp3
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=533819
+Tags: music,last.fm,sidebar,mp3
 Requires at least: 2.5
 Tested up to: 2.6.2
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 
 fmTuner displays recent, top, or loved Last.fm tracks in a customizable format.
 
@@ -34,7 +34,7 @@ Installation of fmTuner is rather straightforward, however it does require PHP 5
 1. Ensure `/wp-content/plugins/fmtuner/` is writable by your webserver (`chmod 755 fmtuner`).
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Set up options in the "Settings" menu in WordPress.
-1. Place `<?php if(function_exists('fmtuner')) { fmtuner(); } ?>` in your templates.
+1. Place `<?php if(function_exists('fmtuner')) { fmtuner(); } ?>` in your desired template.
 
 == Frequently Asked Questions ==
 

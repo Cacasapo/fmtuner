@@ -2,7 +2,7 @@
 	
 	/*
 	Plugin Name: fmTuner
-	Version: 1.0.1
+	Version: 1.0.2
 	Plugin URI: http://www.command-tab.com
 	Description: Displays recent, top, or loved <a href="http://www.last.fm/home" target="_blank">Last.fm</a> tracks in a <a href="options-general.php?page=fmtuner/fmtuner.php">customizable format</a>.
 	Author: Collin Allen
@@ -70,7 +70,7 @@
 					if (time() - filemtime($sCachePath) > $iCacheTime)
 					{
 						// Cache miss
-						$sTracksXml = file_get_contents($sApiUrl);
+						$sTracksXml = fmtuner_fetch($sApiUrl);
 						file_put_contents($sCachePath, $sTracksXml);
 					}
 					else
@@ -82,7 +82,7 @@
 				else
 				{
 					// Fetch the XML for the first time
-					$sTracksXml = file_get_contents($sApiUrl);
+					$sTracksXml = fmtuner_fetch($sApiUrl);
 					file_put_contents($sCachePath, $sTracksXml);
 				}
 				
@@ -178,6 +178,35 @@
 	
 	
 	
+	// Fetch a given URL using file_get_contents or cURL
+	function fmtuner_fetch($sUrl)
+	{
+		// Check if file_get_contents will work
+		if ( ini_get('allow_url_fopen') && function_exists('file_get_contents') && $sUrl )
+		{
+			// Use file_get_contents
+			return file_get_contents($sUrl);
+		}
+		elseif ( function_exists('curl_init') && $sUrl )
+		{
+			// Fall back to cURL
+			$hCurl = curl_init();
+			$iTimeout = 5;
+			curl_setopt($hCurl, CURLOPT_URL, $sUrl);
+			curl_setopt($hCurl, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($hCurl, CURLOPT_CONNECTTIMEOUT, $iTimeout);
+			$sFileContents = curl_exec($hCurl);
+			curl_close($hCurl);
+			return $sFileContents;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	
+	
 	// Add default options to the DB
 	function add_fmtuner_options()
 	{
@@ -245,7 +274,7 @@
 			$sApiUrl = "{$sBaseUrl}{$sMethod}&user={$sUsername}&api_key={$sApiKey}";
 			if ($sUsername != '')
 			{
-				$sTracksXml = file_get_contents($sApiUrl);
+				$sTracksXml = fmtuner_fetch($sApiUrl);
 				file_put_contents(get_option('fmtuner_cachepath'), $sTracksXml);
 			}
 		}
