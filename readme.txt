@@ -2,9 +2,9 @@
 Contributors: command_tab
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=533819
 Tags: music,last.fm,sidebar,mp3
-Requires at least: 2.5
-Tested up to: 2.8.5
-Stable tag: 1.0.8
+Requires at least: 2.7
+Tested up to: 2.9
+Stable tag: 1.0.9
 
 fmTuner displays recent, top, or loved Last.fm tracks in a customizable format.
 
@@ -22,12 +22,12 @@ fmTuner pulls track information from your Last.fm account, including recent trac
 = Requirements =
 
 * A Last.fm account to which you "scrobble" (publish) music details
-* WordPress 2.5 or greater
-* PHP 5 or greater
+* WordPress 2.7 or newer
+* PHP 5 or newer
 
 == Installation ==
 
-Installation of fmTuner is straightforward, however it does require PHP 5 or greater.
+Installation of fmTuner is straightforward, however it does require PHP 5 or newer.
 
 1. Upload `fmtuner.php` to your `/wp-content/plugins/` directory, within a directory like `fmtuner`.
 1. Ensure `/wp-content/plugins/fmtuner/` is writable by your webserver (`chmod 755 fmtuner`).
@@ -91,7 +91,7 @@ Sorry to see you go!  Here's how to remove fmTuner:
 1. Deactivate the plugin through the 'Plugins' menu in WordPress.
 1. Delete the `fmtuner` directory from your `/wp-content/plugins/` directory.
 
-Be sure to [get in touch](http://www.command-tab.com/) if there's something that you think would make fmTuner better!
+Be sure to [get in touch](http://www.command-tab.com/) if there's a particular feature you think would make fmTuner better!
 
 == Screenshots ==
 
@@ -99,6 +99,10 @@ Be sure to [get in touch](http://www.command-tab.com/) if there's something that
 1. One of many possible display options. You are free to configure fmTuner how you prefer!
 
 == Changelog ==
+
+= 1.0.9 =
+* Added a Settings link to the plugin actions list.
+* Tested under WordPress 2.9.
 
 = 1.0.8 =
 * Fixed a bug with the `[::url::]` fmTuner tag that caused Last.fm links to appear incorrectly.

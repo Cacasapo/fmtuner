@@ -2,16 +2,16 @@
     
     /*
     Plugin Name: fmTuner
-    Version: 1.0.8
-    Plugin URI: http://www.command-tab.com
-    Description: Displays recent, top, or loved <a href="http://www.last.fm/home" target="_blank">Last.fm</a> tracks in a <a href="options-general.php?page=fmtuner/fmtuner.php">customizable format</a>.
+    Version: 1.0.9
+    Plugin URI: http://www.command-tab.com/2008/09/06/fmtuner-a-lastfm-plugin-for-wordpress/
+    Description: Displays recent, top, or loved <a href="http://www.last.fm/home" target="_blank">Last.fm</a> tracks in a customizable format.
     Author: Collin Allen
     Author URI: http://www.command-tab.com
     */
     
     
     /*
-    Copyright (c) 2008 Collin Allen, http://www.command-tab.com/
+    Copyright (c) 2010 Collin Allen, http://www.command-tab.com/
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -240,6 +240,21 @@
     {
         add_options_page('fmTuner Settings', 'fmTuner', 1, __FILE__, 'fmtuner_options');
     }
+    
+    
+    
+    // Add a Settings link to the plugin actions list
+    function setup_fmtuner_settings_link($aActionLinks)
+    {
+        $sSettingsLink = '<a class="edit" title="Change fmTuner settings" href="options-general.php?page=' . plugin_basename(__FILE__) . '">Settings</a>';
+        array_unshift($aActionLinks, $sSettingsLink); 
+        return $aActionLinks; 
+    }
+    
+    
+    
+    // Hook into WordPress to add a Settings link
+    add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'setup_fmtuner_settings_link');
     
     
     
