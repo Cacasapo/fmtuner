@@ -2,7 +2,7 @@
 	
 	/*
 	Plugin Name: fmTuner
-	Version: 1.0.3
+	Version: 1.0.4
 	Plugin URI: http://www.command-tab.com
 	Description: Displays recent, top, or loved <a href="http://www.last.fm/home" target="_blank">Last.fm</a> tracks in a <a href="options-general.php?page=fmtuner/fmtuner.php">customizable format</a>.
 	Author: Collin Allen
@@ -32,7 +32,6 @@
 	OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	*/
-	
 	
 	
 	// Display last.fm tracks, no duplicates, none without "large" artwork
@@ -263,7 +262,7 @@
 	// Display the options page in wp-admin
 	function fmtuner_options()
 	{ ?>
-		<div id="wpbody">
+		<div id="fmtuner_body">
 			<div class="wrap">
 <?php
 		if (function_exists('simplexml_load_string') && function_exists('file_put_contents'))
@@ -304,24 +303,22 @@
 							<tr valign="top">
 								<th scope="row">Track Type</th>
 								<td>
-									<fieldset>
-										<?php $sTrackType = get_option('fmtuner_track_type'); ?>
-										<p>
-											<label>
-												<input type="radio" <?php if ($sTrackType == 'user.getrecenttracks') { echo 'checked="checked" '; } ?> class="tog" value="user.getrecenttracks" name="fmtuner_track_type" /> Recent tracks
-											</label>
-										</p>
-										<p>
-											<label>
-												<input type="radio" <?php if ($sTrackType == 'user.getlovedtracks') { echo 'checked="checked" '; } ?> class="tog" value="user.getlovedtracks" name="fmtuner_track_type" /> Loved tracks
-											</label>
-										</p>
-										<p>
-											<label>
-												<input type="radio" <?php if ($sTrackType == 'user.gettoptracks') { echo 'checked="checked" '; } ?> class="tog" value="user.gettoptracks" name="fmtuner_track_type" /> Top tracks
-											</label>
-										</p>
-									</fieldset>
+									<?php $sTrackType = get_option('fmtuner_track_type'); ?>
+									<p>
+										<label>
+											<input type="radio" <?php if ($sTrackType == 'user.getrecenttracks') { echo 'checked="checked" '; } ?> class="tog" value="user.getrecenttracks" name="fmtuner_track_type" /> Recent tracks
+										</label>
+									</p>
+									<p>
+										<label>
+											<input type="radio" <?php if ($sTrackType == 'user.getlovedtracks') { echo 'checked="checked" '; } ?> class="tog" value="user.getlovedtracks" name="fmtuner_track_type" /> Loved tracks
+										</label>
+									</p>
+									<p>
+										<label>
+											<input type="radio" <?php if ($sTrackType == 'user.gettoptracks') { echo 'checked="checked" '; } ?> class="tog" value="user.gettoptracks" name="fmtuner_track_type" /> Top tracks
+										</label>
+									</p>
 								</td>
 							</tr>
 							<tr valign="top">
@@ -337,12 +334,13 @@
 									<label for="fmtuner_update_frequency">Update Frequency</label>
 								</th>
 								<td>
+									
 									<select id="fmtuner_update_frequency" name="fmtuner_update_frequency">
 										<?php $iUpdateFrequency = get_option('fmtuner_update_frequency'); ?>
-										<option <?php if ($iUpdateFrequency == 900) { echo 'selected="selected" '; } ?> value="900">every 15 minutes</option>
-										<option <?php if ($iUpdateFrequency == 1800) { echo 'selected="selected" '; } ?> value="1800">every 30 minutes</option>
-										<option <?php if ($iUpdateFrequency == 3600) { echo 'selected="selected" '; } ?> value="3600">every hour</option>
-										<option <?php if ($iUpdateFrequency == 86400) { echo 'selected="selected" '; } ?> value="86400">every day</option>
+										<option <?php if ($iUpdateFrequency == 900) { echo 'selected="selected" '; } ?> value="900">Every 15 minutes</option>
+										<option <?php if ($iUpdateFrequency == 1800) { echo 'selected="selected" '; } ?> value="1800">Every 30 minutes</option>
+										<option <?php if ($iUpdateFrequency == 3600) { echo 'selected="selected" '; } ?> value="3600">Every hour</option>
+										<option <?php if ($iUpdateFrequency == 86400) { echo 'selected="selected" '; } ?> value="86400">Every day</option>
 									</select>
 								</td>
 							</tr>
@@ -351,23 +349,21 @@
 									<label for="fmtuner_display_format">Display Format</label>
 								</th>
 								<td>
-									<fieldset>
-										<p>
-											<label for="fmtuner_display_format">The fmTuner tags below can be used among standard <abbr title="HyperText Markup Language">HTML</abbr> to customize the album display format.  Tags can be used more than once, or completely left out, depending on your preferences.
-												<ul style="margin: 0px; padding: 0px; list-style: none;">
-													<li><code>[::album::]</code> Album name (Only available for <strong>Recent tracks</strong>.)</li>
-													<li><code>[::artist::]</code> Artist name</li>
-													<li><code>[::image::]</code> Album artwork address (Usually ~120 pixels in size &mdash; may not be square.  If used, only tracks with artwork will be shown.)</li>
-													<li><code>[::number::]</code> Track number within the fmTuner set (e.g. for a numbered list)</li>
-													<li><code>[::title::]</code> Track title</li>
-													<li><code>[::url::]</code> Last.fm track address</li>
-												</ul>
-											</label>
-										</p>
-										<p>
-											<textarea class="code" style="width: 98%; font-size: 12px;" id="fmtuner_display_format" rows="8" cols="60" name="fmtuner_display_format"><?php echo get_option('fmtuner_display_format'); ?></textarea>
-										</p>
-									</fieldset>
+									<p>
+										<label for="fmtuner_display_format">The fmTuner tags below can be used among standard <abbr title="HyperText Markup Language">HTML</abbr> to customize the album display format.  Tags can be used more than once, or completely left out, depending on your preferences.
+											<ul style="margin: 0px; padding: 0px; list-style: none;">
+												<li><code>[::album::]</code> Album name (Only available for <strong>Recent tracks</strong>.)</li>
+												<li><code>[::artist::]</code> Artist name</li>
+												<li><code>[::image::]</code> Album artwork address (Usually ~120 pixels in size &mdash; may not be square.  If used, only tracks with artwork will be shown.)</li>
+												<li><code>[::number::]</code> Track number within the fmTuner set (e.g. for a numbered list)</li>
+												<li><code>[::title::]</code> Track title</li>
+												<li><code>[::url::]</code> Last.fm track address</li>
+											</ul>
+										</label>
+									</p>
+									<p>
+										<textarea class="code" style="width: 98%; font-size: 12px;" id="fmtuner_display_format" rows="8" cols="60" name="fmtuner_display_format"><?php echo get_option('fmtuner_display_format'); ?></textarea>
+									</p>
 								</td>
 							</tr>
 						</tbody>

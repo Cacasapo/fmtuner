@@ -3,8 +3,8 @@ Contributors: command_tab
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=533819
 Tags: music,last.fm,sidebar,mp3
 Requires at least: 2.5
-Tested up to: 2.6.2
-Stable tag: 1.0.3
+Tested up to: 2.7
+Stable tag: 1.0.4
 
 fmTuner displays recent, top, or loved Last.fm tracks in a customizable format.
 
@@ -45,6 +45,17 @@ fmTuner pulls your latest tracks from Last.fm according to the settings page in 
 = How many tracks can I display? =
 
 Tracks can be limited in the settings page for fmTuner, however Last.fm only provides up to 10 Recent Tracks.  Loved and Top Tracks offer many more.  Between 1 and 10 is recommended.
+
+== fmTuner Tags ==
+
+These fmTuner tags can be sprinkled among HTML (in the fmTuner Settings page) to customize your album display format. Tags can be used more than once, or completely left out, depending on your preferences.
+
+* `[::album::]` Album name (Only available for Recent tracks.)
+* `[::artist::]` Artist name
+* `[::image::]` Album artwork address (Usually ~120 pixels in size, but may not be square. If used, only tracks with artwork will be shown.)
+* `[::number::]` Track number within the fmTuner set (e.g. for a numbered list)
+* `[::title::]` Track title
+* `[::url::]` Last.fm track address
 
 == Removal ==
 
