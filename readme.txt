@@ -99,6 +99,10 @@ Be sure to [get in touch](http://www.command-tab.com) if there's a particular fe
 
 == Changelog ==
 
+= Cacasapo fork = 
+* Edited plugin for https-only operation
+* Tested on WP 4.5.3
+
 = 1.1 =
 * Added a placeholder image field to the fmTuner Settings page, which will be substituted when tracks have no artwork.
 * Tested under WordPress 2.9.1.
