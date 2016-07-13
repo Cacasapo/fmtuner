@@ -1,3 +1,6 @@
+MODIFIED VERSION: This version uses https for its image links.
+
+
 === fmTuner ===
 Contributors: command_tab
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=533819
