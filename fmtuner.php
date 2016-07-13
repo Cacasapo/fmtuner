@@ -9,7 +9,7 @@
     Author URI: http://www.command-tab.com
     */
     
-    
+
     /*
     Copyright (c) 2010 Collin Allen, http://www.command-tab.com
 
@@ -59,6 +59,16 @@
             else
                 $bUsingImages = true;
             
+		// DIsable HTTPS certificate bitching
+			$opts=array(
+										"ssl"=>array(
+										"verify_peer"=>false,
+										"verify_peer_name"=>false,
+													),
+										);  
+			
+			
+			
             // Run only if a username is set
             if ($sUsername)
             {
@@ -70,6 +80,7 @@
                     {
                         // Cache miss
                         $sTracksXml = fmtuner_fetch($sApiUrl);
+						$sTracksXml = str_ireplace('http:', 'https:', $sTracksXml);
                         file_put_contents($sCachePath, $sTracksXml);
                     }
                     else
@@ -82,9 +93,11 @@
                 {
                     // Fetch the XML for the first time
                     $sTracksXml = fmtuner_fetch($sApiUrl);
-                    file_put_contents($sCachePath, $sTracksXml);
-                }
-                
+				    $sTracksXml = str_ireplace('http:', 'https:', $sTracksXml);
+					file_put_contents($sCachePath, $sTracksXml);
+				}
+				
+				
                 // Parse the XML
                 $xTracksXml = simplexml_load_string($sTracksXml);
                 $aTracks = array();
@@ -147,16 +160,20 @@
                                 '[::title::]',
                                 '[::url::]'
                             );
-                            $aData = array(
+                            
+							$aData = array(
                                 $oTrack->album,
                                 $sArtist,
                                 $sImage,
                                 $iTotal,
                                 $oTrack->name,
-                                (strpos($oTrack->url, 'http') === 0) ? $oTrack->url : 'http://' . $oTrack->url // Some tracks start with 'www', which creates a bad link
+                                (strpos($oTrack->url, 'http') === 0) ? $oTrack->url : 'https://' . $oTrack->url // Some tracks start with 'www', which creates a bad link
                             );
                             
-                            // Clean up data, prevent XSS, etc.
+							
+							
+							
+							// Clean up data, prevent XSS, etc.
                             foreach ($aData as $iKey => $sValue)
                                 $aData[$iKey] = trim(strip_tags(htmlspecialchars($sValue)));
                             
@@ -296,6 +313,7 @@
             if ($sUsername != '')
             {
                 $sTracksXml = fmtuner_fetch($sApiUrl);
+				$sTracksXml = str_ireplace('http:', 'https:', $sTracksXml);
                 file_put_contents(get_option('fmtuner_cachepath'), $sTracksXml);
             }
         }
